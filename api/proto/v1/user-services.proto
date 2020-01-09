@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+        title: "user-services";
+        version: "1.0";
+        contact: {
+            name: "user-services";
+            url: "https://github.com/dickygeraldi/proto-user-services";
+            email: "dickygeraldi@gmail.com";
+        };
+    };
+    
+    schemes: HTTP;
+    consumes: "application/json";
+    produces: "application/json";
+    responses: {
+		key: "404";
+		value: {
+			description: "Returned when the resource does not exist.";
+			schema: {
+				json_schema: {
+					type: STRING;
+				}
+			}
+		}
+	}
+};
+
+message RegisterAccountRequest {
+    string api = 1;
+    string numberPhone = 2;
+    string username = 3;
+    string fullName = 4;
+    string password = 5;
+}
+
+message RegisterAccountResponse {
+    string code = 1;
+    string status = 2;
+    string message = 3;
+    DataResponseAccount data = 4;
+}
+
+message DataResponseAccount {
+    string token = 1;
+    bool isActive = 2;
+    string fullName = 3;
+    string loggedTime = 4;
+}
+
+message DataRequest {
+    string hello = 1;
+}
+
+message DataResponse {
+    string output = 1;
+}
+
+service UserServices {
+    rpc RegisterAccount(RegisterAccountRequest) returns (RegisterAccountResponse) {
+        option(google.api.http) = {
+            post: "/v1/user-services/register-account-harvesting"
+            body: "*"
+        };
+    }
+
+    rpc DataCoba(DataRequest) returns (DataResponse) {
+        option(google.api.http) = {
+            post: "/v1/percobaan"
+            body: "*"
+        };
+    }
+}
