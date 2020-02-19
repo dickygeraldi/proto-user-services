@@ -147,9 +147,9 @@ func GenerateQueryForUser(queryParams QueryParams) string {
 	var dqb DynamicQueryBuilder
 
 	query := dqb.And(
-		dqb.NewExp("username", "=", queryParams["username"]),
-		dqb.NewExp("email", "=", queryParams["email"]),
-		dqb.NewExp("phoneNumber", "=", queryParams["numberPhone"]),
+		dqb.NewExp("\"email\"", "=", queryParams["email"]),
+		dqb.NewExp("\"phoneNumber\"", "=", queryParams["numberPhone"]),
+		dqb.NewExp("\"password\"", "=", queryParams["password"]),
 	).BindSql("select count(*) as count from \"user\"")
 
 	return query

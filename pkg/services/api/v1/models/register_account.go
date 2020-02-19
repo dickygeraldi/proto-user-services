@@ -18,7 +18,7 @@ import (
 	"github.com/minio/highwayhash"
 )
 
-// Set global environment variable
+// Set global environment variablea
 var conf *global.Configuration
 var messageError map[int]global.MessageError
 var level, cases, fatal string
@@ -36,7 +36,7 @@ func Encrypt(data string) (string, error) {
 	plainText, err := pkcs7.Pad(plainText, aes.BlockSize)
 
 	if err != nil {
-		err := fmt.Errorf(`plainText: "%s" has the wrong block size`, plainText)
+		err := fmt.Errorf(`text: "%s" block size salah`, plainText)
 		return "", err
 	}
 
@@ -105,15 +105,40 @@ func JwtTokenCreate(token *global.Tokenization) (string, error) {
 	return tokenNew, nil
 }
 
+// Function password hashing
+func hashPasswordData(password string) string {
+	passwordHash := highwayhash.Sum([]byte(password), []byte(conf.KeyPass))
+	pass := hex.EncodeToString(passwordHash[:])
+
+	return fmt.Sprintf(pass)
+}
+
+// Function for create Token JWT
+func createToken(userId, timeRequest, ipAddress, numberPhone string) string {
+	tokenJwt := &global.Tokenization{
+		UserId:      userId,
+		Time:        timeRequest,
+		Ip:          ipAddress,
+		NumberPhone: numberPhone,
+	}
+
+	tokenAuth, _ := JwtTokenCreate(tokenJwt)
+	encrypted, _ := Encrypt(tokenAuth)
+
+	return encrypted
+}
+
 // Function for register account
-func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeRequest string, connection *sql.DB, ctx context.Context) (code, status, message, token, fullName string, isActive bool) {
+func RegisterAccount(ipAddress, numberPhone, fullname, password, timeRequest string, connection *sql.DB, ctx context.Context) (code, status, message, token, fullName string, isActive bool) {
 	var count int
 
-	// check username
+	// check username and numberPhone
 	checkUsername := global.GenerateQueryForUser(map[string]string{
-		"username": username,
+		"numberPhone": numberPhone,
+		"email":       "",
 	})
 
+	fmt.Println(checkUsername)
 	rows := connection.QueryRowContext(ctx, checkUsername)
 
 	err := rows.Scan(&count)
@@ -122,32 +147,20 @@ func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeR
 	}
 
 	if count == 0 {
-		passwordHash := highwayhash.Sum([]byte(password), []byte(conf.KeyPass))
-		pass := hex.EncodeToString(passwordHash[:])
+		pass := hashPasswordData(password)
 		userId := getRandomString()
 
-		tokenJwt := &global.Tokenization{
-			UserId:   userId,
-			Password: pass,
-			Time:     timeRequest,
-			Ip:       ipAddress,
-			Username: username,
-		}
+		token = createToken(userId, timeRequest, ipAddress, numberPhone)
 
-		tokenAuth, _ := JwtTokenCreate(tokenJwt)
-		encrypted, _ := Encrypt(tokenAuth)
+		go func() {
+			sql := `INSERT INTO "user" ("id", "phoneNumber", "fullName", "password", "status", "createdAt") VALUES ($1, $2, $3, $4, $5, $6)`
 
-		token = encrypted
+			_, err := connection.Query(sql, userId, numberPhone, fullname, pass, 1, timeRequest)
 
-		// go func() {
-		sql := `INSERT INTO "user" ("id", "username", "phoneNumber", "fullName", "token", "createdAt") VALUES ($1, $2, $3, $4, $5, $6)`
-
-		_, err := connection.Query(sql, userId, username, numberPhone, fullname, token, timeRequest)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-		// }()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}()
 
 		code = messageError[00].Code
 		message = messageError[00].Message
@@ -156,7 +169,7 @@ func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeR
 	} else {
 		code = messageError[422].Code
 		message = messageError[422].Message
-		status = "Failed registration, username has been taken"
+		status = "Failed registration, numberPhone has been taken"
 		token = ""
 		fullName = fullname
 		isActive = false
@@ -164,3 +177,5 @@ func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeR
 
 	return code, status, message, token, fullname, isActive
 }
+
+// Login request

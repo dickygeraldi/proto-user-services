@@ -3,17 +3,13 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	v1 "protoUserService/pkg/api/v1"
-	"protoUserService/pkg/services/api/v1/global"
 	"protoUserService/pkg/services/api/v1/models"
 	"protoUserService/pkg/services/api/v1/validation"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 )
@@ -38,49 +34,39 @@ func (s *userServices) CheckApi(api string) error {
 	return nil
 }
 
-// Function to check token valid or not
-func Auth(data string) (string, bool) {
-	tokenize := &global.Tokenization{}
+// Function login user account
+func (s *userServices) LoginAccount(ctx context.Context, req *v1.LoginAccountRequest) (*v1.LoginAccountResponse, error) {
+	// Get data IP Address
+	// dataIp, _ := peer.FromContext(ctx)
+	// timeRequest := time.Now().Format("2006-01-02 15:04:05")
+	// var code, status, message, token, fullName string
+	// var isActive bool
 
-	tkn, err := jwt.ParseWithClaims(data, tokenize, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("TOKEN")), nil
-	})
+	// message, err := validation.LoginRequest(dataIp.Addr.String(), timeRequest, req.Api, req.NumberPhone, req.Password)
 
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return "Invalid signature", false
-		}
-		return "Bas Request", false
-	}
+	// if err == false {
+	// 	message = message
+	// 	status = "Field is not match requirement"
+	// 	code = "422"
+	// } else {
+	// 	if err := s.CheckApi(req.Api); err != nil {
+	// 		return nil, err
+	// 	} else {
+	// code, status, message, token, fullName, isActive = models.Login
+	// 	}
+	// }
 
-	if !tkn.Valid {
-		return "Invalid Token", false
-	} else {
-		fmt.Println(tokenize)
-		return "Token valid", true
-	}
-}
-
-// Func percobaan header
-func (s *userServices) DataCoba(ctx context.Context, req *v1.DataRequest) (*v1.DataResponse, error) {
-	headers, _ := metadata.FromIncomingContext(ctx)
-	data := headers["authorization"]
-	fmt.Println(data)
-
-	decodedData, _ := models.Decrypt(data[0])
-	fmt.Println(decodedData)
-
-	token, status := Auth(decodedData)
-
-	if status == false {
-		return &v1.DataResponse{
-			Output: token,
-		}, nil
-	} else {
-		return &v1.DataResponse{
-			Output: token,
-		}, nil
-	}
+	return &v1.LoginAccountResponse{
+		Code:    "00",
+		Status:  "berhasil",
+		Message: "Berhasil",
+		Data: &v1.DataResponseAccount{
+			Token:      "dads",
+			IsActive:   true,
+			FullName:   "Dasd",
+			LoggedTime: "asdasd",
+		},
+	}, nil
 }
 
 // Func register account
@@ -91,7 +77,7 @@ func (s *userServices) RegisterAccount(ctx context.Context, req *v1.RegisterAcco
 	var code, status, message, token, fullName string
 	var isActive bool
 
-	message, err := validation.RegistrationRequest(req.Api, req.NumberPhone, req.Username, req.FullName, req.Password, timeRequest, dataIp.Addr.String())
+	message, err := validation.RegistrationRequest(req.Api, req.NumberPhone, req.FullName, req.Password, timeRequest, dataIp.Addr.String())
 
 	if err == false {
 		message = message
@@ -101,7 +87,7 @@ func (s *userServices) RegisterAccount(ctx context.Context, req *v1.RegisterAcco
 		if err := s.CheckApi(req.Api); err != nil {
 			return nil, err
 		} else {
-			code, status, message, token, fullName, isActive = models.RegisterAccount(dataIp.Addr.String(), req.NumberPhone, req.Username, req.FullName, req.Password, timeRequest, s.db, ctx)
+			code, status, message, token, fullName, isActive = models.RegisterAccount(dataIp.Addr.String(), req.NumberPhone, req.FullName, req.Password, timeRequest, s.db, ctx)
 		}
 	}
 

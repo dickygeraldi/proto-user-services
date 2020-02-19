@@ -35,9 +35,8 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 message RegisterAccountRequest {
     string api = 1;
     string numberPhone = 2;
-    string username = 3;
-    string fullName = 4;
-    string password = 5;
+    string fullName = 3;
+    string password = 4;
 }
 
 message RegisterAccountResponse {
@@ -54,12 +53,17 @@ message DataResponseAccount {
     string loggedTime = 4;
 }
 
-message DataRequest {
-    string hello = 1;
+message LoginAccountRequest {
+    string api = 1;
+    string numberPhone = 2;
+    string password = 3;
 }
 
-message DataResponse {
-    string output = 1;
+message LoginAccountResponse {
+    string code = 1;
+    string status = 2;
+    string message = 3;
+    DataResponseAccount data = 4;
 }
 
 service UserServices {
@@ -70,9 +74,9 @@ service UserServices {
         };
     }
 
-    rpc DataCoba(DataRequest) returns (DataResponse) {
+    rpc LoginAccount(LoginAccountRequest) returns (LoginAccountResponse) {
         option(google.api.http) = {
-            post: "/v1/percobaan"
+            post: "/v1/user-services/login-account"
             body: "*"
         };
     }

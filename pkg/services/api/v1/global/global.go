@@ -17,11 +17,10 @@ func init() {
 
 // Tokenization for JWT auth
 type Tokenization struct {
-	UserId   string
-	Password string
-	Time     string
-	Ip       string
-	Username string
+	UserId      string
+	Time        string
+	Ip          string
+	NumberPhone string
 	jwt.StandardClaims
 }
 
@@ -49,6 +48,14 @@ type Configuration struct {
 	KeyAes     string
 }
 
+// Tokenize data
+type MerchantToken struct {
+	TimeStamp  string
+	KeyRequest string
+	MerchantId string
+	jwt.StandardClaims
+}
+
 // New returns a new Config struct
 func New() *Configuration {
 	return &Configuration{
@@ -73,6 +80,29 @@ func getEnv(key string, defaultVal string) string {
 	}
 
 	return defaultVal
+}
+
+// Function to check token valid or not
+func Auth(data string) (string, bool) {
+	tokenize := Tokenization{}
+
+	tkn, err := jwt.ParseWithClaims(data, tokenize, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("TOKEN")), nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return "Invalid signature", false
+		}
+		return "Bas Request", false
+	}
+
+	if !tkn.Valid {
+		return "Invalid Token", false
+	} else {
+		fmt.Println(tokenize)
+		return "Token valid", true
+	}
 }
 
 // func to set code and message validation

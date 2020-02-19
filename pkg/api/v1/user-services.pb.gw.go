@@ -65,8 +65,8 @@ func local_request_UserServices_RegisterAccount_0(ctx context.Context, marshaler
 
 }
 
-func request_UserServices_DataCoba_0(ctx context.Context, marshaler runtime.Marshaler, client UserServicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DataRequest
+func request_UserServices_LoginAccount_0(ctx context.Context, marshaler runtime.Marshaler, client UserServicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq LoginAccountRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -77,13 +77,13 @@ func request_UserServices_DataCoba_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.DataCoba(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.LoginAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_UserServices_DataCoba_0(ctx context.Context, marshaler runtime.Marshaler, server UserServicesServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DataRequest
+func local_request_UserServices_LoginAccount_0(ctx context.Context, marshaler runtime.Marshaler, server UserServicesServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq LoginAccountRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -94,7 +94,7 @@ func local_request_UserServices_DataCoba_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.DataCoba(ctx, &protoReq)
+	msg, err := server.LoginAccount(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -124,7 +124,7 @@ func RegisterUserServicesHandlerServer(ctx context.Context, mux *runtime.ServeMu
 
 	})
 
-	mux.Handle("POST", pattern_UserServices_DataCoba_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_UserServices_LoginAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -133,14 +133,14 @@ func RegisterUserServicesHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_UserServices_DataCoba_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_UserServices_LoginAccount_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_UserServices_DataCoba_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_UserServices_LoginAccount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -205,7 +205,7 @@ func RegisterUserServicesHandlerClient(ctx context.Context, mux *runtime.ServeMu
 
 	})
 
-	mux.Handle("POST", pattern_UserServices_DataCoba_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_UserServices_LoginAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -214,14 +214,14 @@ func RegisterUserServicesHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_UserServices_DataCoba_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_UserServices_LoginAccount_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_UserServices_DataCoba_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_UserServices_LoginAccount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -231,11 +231,11 @@ func RegisterUserServicesHandlerClient(ctx context.Context, mux *runtime.ServeMu
 var (
 	pattern_UserServices_RegisterAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "user-services", "register-account-harvesting"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UserServices_DataCoba_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "percobaan"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UserServices_LoginAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "user-services", "login-account"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
 	forward_UserServices_RegisterAccount_0 = runtime.ForwardResponseMessage
 
-	forward_UserServices_DataCoba_0 = runtime.ForwardResponseMessage
+	forward_UserServices_LoginAccount_0 = runtime.ForwardResponseMessage
 )

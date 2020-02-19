@@ -19,14 +19,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/percobaan": {
+    "/v1/user-services/login-account": {
       "post": {
-        "operationId": "DataCoba",
+        "operationId": "LoginAccount",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1DataResponse"
+              "$ref": "#/definitions/v1LoginAccountResponse"
             }
           },
           "404": {
@@ -43,7 +43,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1DataRequest"
+              "$ref": "#/definitions/v1LoginAccountRequest"
             }
           }
         ],
@@ -87,22 +87,6 @@
     }
   },
   "definitions": {
-    "v1DataRequest": {
-      "type": "object",
-      "properties": {
-        "hello": {
-          "type": "string"
-        }
-      }
-    },
-    "v1DataResponse": {
-      "type": "object",
-      "properties": {
-        "output": {
-          "type": "string"
-        }
-      }
-    },
     "v1DataResponseAccount": {
       "type": "object",
       "properties": {
@@ -121,7 +105,7 @@
         }
       }
     },
-    "v1RegisterAccountRequest": {
+    "v1LoginAccountRequest": {
       "type": "object",
       "properties": {
         "api": {
@@ -130,7 +114,35 @@
         "numberPhone": {
           "type": "string"
         },
-        "username": {
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "v1LoginAccountResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v1DataResponseAccount"
+        }
+      }
+    },
+    "v1RegisterAccountRequest": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "numberPhone": {
           "type": "string"
         },
         "fullName": {
