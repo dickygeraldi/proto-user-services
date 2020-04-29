@@ -106,7 +106,7 @@ func JwtTokenCreate(token *global.Tokenization) (string, error) {
 }
 
 // Function for register account
-func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeRequest string, connection *sql.DB, ctx context.Context) (code, status, message, token, fullName string, isActive bool) {
+func RegisterAccount(ipAddress, username, password, timeRequest string, connection *sql.DB, ctx context.Context) (code, status, message, dataUsername string) {
 	var count int
 
 	// check username
@@ -126,6 +126,51 @@ func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeR
 		pass := hex.EncodeToString(passwordHash[:])
 		userId := getRandomString()
 
+		go func() {
+			sql := `INSERT INTO "users" ("userId", "username", "password", "status") VALUES ($1, $2, $3, $4)`
+
+			_, err := connection.Query(sql, userId, username, pass, "isActive")
+
+			if err != nil {
+				fmt.Println(err)
+			}
+		}()
+
+		code = messageError[00].Code
+		message = messageError[00].Message
+		dataUsername = username
+		status = "Registration Success"
+	} else {
+		code = messageError[422].Code
+		message = "Failed registration, username has been taken"
+		status = messageError[422].Message
+		dataUsername = username
+	}
+
+	return code, status, message, dataUsername
+}
+
+// Func login
+func LoginAccount(ipAddress, username, password, timeRequest string, connection *sql.DB, ctx context.Context) (code, status, message, dataUsername, token string) {
+	passwordHash := highwayhash.Sum([]byte(password), []byte(conf.KeyPass))
+	pass := hex.EncodeToString(passwordHash[:])
+
+	var userId string
+
+	// check username
+	checkUsername := global.GenerateQueryForLogin(map[string]string{
+		"username": username,
+		"password": pass,
+	})
+
+	rows := connection.QueryRowContext(ctx, checkUsername)
+
+	err := rows.Scan(&userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if userId != "" {
 		tokenJwt := &global.Tokenization{
 			UserId:   userId,
 			Password: pass,
@@ -138,29 +183,18 @@ func RegisterAccount(ipAddress, numberPhone, username, fullname, password, timeR
 		encrypted, _ := Encrypt(tokenAuth)
 
 		token = encrypted
+		code = "00"
+		status = "Success"
+		message = "Login success"
+		dataUsername = username
 
-		// go func() {
-		sql := `INSERT INTO "user" ("id", "username", "phoneNumber", "fullName", "token", "createdAt") VALUES ($1, $2, $3, $4, $5, $6)`
-
-		_, err := connection.Query(sql, userId, username, numberPhone, fullname, token, timeRequest)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-		// }()
-
-		code = messageError[00].Code
-		message = messageError[00].Message
-		status = "Registration Success"
-		isActive = true
 	} else {
-		code = messageError[422].Code
-		message = messageError[422].Message
-		status = "Failed registration, username has been taken"
-		token = ""
-		fullName = fullname
-		isActive = false
+		token = "nil"
+		code = "05"
+		status = "Failed Login"
+		message = "Invalid username or password"
+		dataUsername = username
 	}
 
-	return code, status, message, token, fullname, isActive
+	return code, status, message, dataUsername, token
 }

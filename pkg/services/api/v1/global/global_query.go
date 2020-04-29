@@ -150,7 +150,19 @@ func GenerateQueryForUser(queryParams QueryParams) string {
 		dqb.NewExp("username", "=", queryParams["username"]),
 		dqb.NewExp("email", "=", queryParams["email"]),
 		dqb.NewExp("phoneNumber", "=", queryParams["numberPhone"]),
-	).BindSql("select count(*) as count from \"user\"")
+	).BindSql("select count(*) as count from \"users\"")
+
+	return query
+}
+
+// Query select no dispute of number phone, username, or email registered before
+func GenerateQueryForLogin(queryParams QueryParams) string {
+	var dqb DynamicQueryBuilder
+
+	query := dqb.And(
+		dqb.NewExp("username", "=", queryParams["username"]),
+		dqb.NewExp("password", "=", queryParams["password"]),
+	).BindSql("select \"userId\" as count from \"users\"")
 
 	return query
 }

@@ -88,10 +88,9 @@ func (s *userServices) RegisterAccount(ctx context.Context, req *v1.RegisterAcco
 	// Get data IP Address
 	dataIp, _ := peer.FromContext(ctx)
 	timeRequest := time.Now().Format("2006-01-02 15:04:05")
-	var code, status, message, token, fullName string
-	var isActive bool
+	var code, status, message, username string
 
-	message, err := validation.RegistrationRequest(req.Api, req.NumberPhone, req.Username, req.FullName, req.Password, timeRequest, dataIp.Addr.String())
+	message, err := validation.RegistrationRequest(req.Api, req.Username, req.Password, timeRequest, dataIp.Addr.String())
 
 	if err == false {
 		message = message
@@ -101,7 +100,7 @@ func (s *userServices) RegisterAccount(ctx context.Context, req *v1.RegisterAcco
 		if err := s.CheckApi(req.Api); err != nil {
 			return nil, err
 		} else {
-			code, status, message, token, fullName, isActive = models.RegisterAccount(dataIp.Addr.String(), req.NumberPhone, req.Username, req.FullName, req.Password, timeRequest, s.db, ctx)
+			code, status, message, username = models.RegisterAccount(dataIp.Addr.String(), req.Username, req.Password, timeRequest, s.db, ctx)
 		}
 	}
 
@@ -110,9 +109,40 @@ func (s *userServices) RegisterAccount(ctx context.Context, req *v1.RegisterAcco
 		Status:  status,
 		Message: message,
 		Data: &v1.DataResponseAccount{
+			Username: username,
+		},
+	}, nil
+}
+
+// function login
+func (s *userServices) LoginAccount(ctx context.Context, req *v1.LoginRequest) (*v1.LoginResponse, error) {
+	// Get data IP Address
+	dataIp, _ := peer.FromContext(ctx)
+	timeRequest := time.Now().Format("2006-01-02 15:04:05")
+	var code, status, message, username, token string
+
+	message, err := validation.RegistrationRequest(req.Api, req.Username, req.Password, timeRequest, dataIp.Addr.String())
+
+	if err == false {
+		message = message
+		status = "Field is not match requirement"
+		code = "422"
+	} else {
+		if err := s.CheckApi(req.Api); err != nil {
+			return nil, err
+		} else {
+			code, status, message, username, token = models.LoginAccount(dataIp.Addr.String(), req.Username, req.Password, timeRequest, s.db, ctx)
+		}
+	}
+
+	return &v1.LoginResponse{
+		Code:    code,
+		Status:  status,
+		Message: message,
+		Data: &v1.DataResponseLogin{
 			Token:      token,
-			FullName:   fullName,
-			IsActive:   isActive,
+			IsActive:   true,
+			Username:   username,
 			LoggedTime: timeRequest,
 		},
 	}, nil
